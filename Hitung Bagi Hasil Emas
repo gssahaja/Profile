@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kalkulator Hasil Tambang</title>
+    <style>
+        body { font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto; background-color: #f0f2f5; margin: 0; padding: 15px; display: flex; justify-content: center; }
+        .app-card { background: white; width: 100%; max-width: 450px; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #b8860b; margin-bottom: 20px; font-size: 22px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+        label { display: block; font-size: 12px; font-weight: bold; color: #555; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 14px; border: 2px solid #ececec; border-radius: 12px; box-sizing: border-box; font-size: 16px; background: #fafafa; outline: none; }
+        input:focus { border-color: #d4af37; background: #fff; }
+        .btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #d4af37, #b8860b); color: white; border: none; border-radius: 15px; font-size: 18px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        .result-box { margin-top: 20px; display: none; background: #fffef0; border: 2px solid #d4af37; border-radius: 15px; padding: 15px; }
+        .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+        .main-res { background: #d4edda; padding: 15px; border-radius: 12px; margin-top: 15px; border-left: 5px solid #28a745; }
+        .main-res span { font-size: 12px; font-weight: bold; color: #155724; display: block; }
+        .main-res b { font-size: 24px; color: #155724; }
+    </style>
+</head>
+<body>
+
+<div class="app-card">
+    <h2>⚒️ HITUNG HASIL</h2>
+    
+    <div class="group">
+        <div>
+            <label>Emas (Gram)</label>
+            <input type="number" id="g" step="0.01" placeholder="0.00">
+        </div>
+        <div>
+            <label>Potongan (%)</label>
+            <input type="number" id="p" value="25">
+        </div>
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        <label>Harga per Gram (Rp)</label>
+        <input type="number" id="hg" placeholder="Contoh: 1000000">
+    </div>
+
+    <div class="group">
+        <div>
+            <label>Minyak (Teng)</label>
+            <input type="number" id="t" placeholder="0">
+        </div>
+        <div>
+            <label>Harga/Teng</label>
+            <input type="number" id="hm" value="150000">
+        </div>
+    </div>
+
+    <div class="group">
+        <div>
+            <label>Jml Lapangan</label>
+            <input type="number" id="jl" placeholder="Orang">
+        </div>
+        <div>
+            <label>Mesin Win</label>
+            <select id="ws">
+                <option value="y">IKUT</option>
+                <option value="n">TIDAK</option>
+            </select>
+        </div>
+    </div>
+
+    <button class="btn" onclick="hitung()">HITUNG SEKARANG</button>
+
+    <div id="res" class="result-box">
+        <div class="row"><span>Total Jual</span> <b id="o1"></b></div>
+        <div class="row"><span>Uang Persen</span> <b id="o2" style="color:red"></b></div>
+        <div class="row"><span>Uang Minyak</span> <b id="o3"></b></div>
+        <div class="row"><span>Jatah Bos</span> <b id="o4"></b></div>
+        <div id="rowW" class="row" style="color:#b8860b"><span>Bagian Mesin Win</span> <b id="o5"></b></div>
+        
+        <div class="main-res">
+            <span>UPAH PER LAPANGAN:</span>
+            <b id="o6"></b>
+        </div>
+    </div>
+</div>
+
+<script>
+    function hitung() {
+        const gram = parseFloat(document.getElementById('g').value) || 0;
+        const hargaG = parseFloat(document.getElementById('hg').value) || 0;
+        const persen = parseFloat(document.getElementById('p').value) || 0;
+        const teng = parseFloat(document.getElementById('t').value) || 0;
+        const hargaM = parseFloat(document.getElementById('hm').value) || 0;
+        const jmlL = parseInt(document.getElementById('jl').value) || 0;
+        const win = document.getElementById('ws').value;
+
+        const kotor = gram * hargaG;
+        const uPersen = kotor * (persen / 100);
+        const uMinyak = teng * hargaM;
+        const sisa = kotor - uPersen - uMinyak;
+        
+        const bos = sisa / 2;
+        const upahTotal = sisa / 2;
+        
+        let uWin = 0, uLap = 0;
+
+        if (win === "y") {
+            const pembagi = jmlL + 1;
+            const dasar = upahTotal / pembagi;
+            uWin = dasar;
+            uLap = dasar + (jmlL > 0 ? (uPersen / jmlL) : 0);
+            document.getElementById('rowW').style.display = 'flex';
+        } else {
+            uLap = jmlL > 0 ? (upahTotal + uPersen) / jmlL : 0;
+            document.getElementById('rowW').style.display = 'none';
+        }
+
+        document.getElementById('res').style.display = 'block';
+        document.getElementById('o1').innerText = "Rp " + kotor.toLocaleString('id-ID');
+        document.getElementById('o2').innerText = "- Rp " + uPersen.toLocaleString('id-ID');
+        document.getElementById('o3').innerText = "Rp " + uMinyak.toLocaleString('id-ID');
+        document.getElementById('o4').innerText = "Rp " + bos.toLocaleString('id-ID');
+        document.getElementById('o5').innerText = "Rp " + uWin.toLocaleString('id-ID');
+        document.getElementById('o6').innerText = "Rp " + Math.round(uLap).toLocaleString('id-ID');
+    }
+</script>
+
+</body>
+</html>
